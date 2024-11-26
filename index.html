@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberQuest 60-Day To-Do List</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <!-- Logo and Header -->
+
+        <h1>CyberQuest 60-Day Journey</h1>
+        <p>Your roadmap to mastering cybersecurity.</p>
+    </header>
+
+    <main>
+        <section id="todo-list">
+            <!-- Days will be dynamically added here -->
+        </section>
+    </main>
+
+    <footer>
+        <p>Stay consistent and reach your goals! 🚀</p>
+    </footer>
+
+    <script>
+        const todoList = document.getElementById('todo-list');
+
+        // Generate 60-day sections dynamically
+        for (let day = 1; day <= 60; day++) {
+            const daySection = document.createElement('div');
+            daySection.className = 'day';
+
+            daySection.innerHTML = `
+                <div class="day-header">
+                    <button class="toggle-btn" onclick="toggleDay(${day})">➕</button>
+                    <h2>Day ${day}</h2>
+                    <input type="checkbox" id="complete-${day}" class="complete-checkbox" onchange="toggleCompleted(${day})">
+                    <label for="complete-${day}">Completed</label>
+                </div>
+                <div class="form-group">
+                    <label for="planned-topics-${day}">Planned Topics</label>
+                    <textarea id="planned-topics-${day}" placeholder="What topics do you plan to learn today?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="learned-topics-${day}">Learned Topics</label>
+                    <textarea id="learned-topics-${day}" placeholder="What topics did you actually learn?"></textarea>
+                </div>
+            `;
+
+            todoList.appendChild(daySection);
+        }
+
+        // Function to toggle day visibility
+        function toggleDay(day) {
+            const daySection = document.querySelector(`.day:nth-child(${day})`);
+            const toggleBtn = daySection.querySelector('.toggle-btn');
+            const formGroup = daySection.querySelectorAll('.form-group');
+
+            if (formGroup[0].style.display === 'none') {
+                formGroup.forEach(item => item.style.display = 'block');
+                toggleBtn.textContent = '➖'; // Change button to collapse
+            } else {
+                formGroup.forEach(item => item.style.display = 'none');
+                toggleBtn.textContent = '➕'; // Change button to expand
+            }
+        }
+
+        // Function to toggle completed state
+        function toggleCompleted(day) {
+            const daySection = document.querySelector(`.day:nth-child(${day})`);
+            const checkbox = document.getElementById(`complete-${day}`);
+
+            if (checkbox.checked) {
+                daySection.style.backgroundColor = '#d4edda'; // Green for completed
+                daySection.querySelector('h2').style.textDecoration = 'line-through'; // Strike-through for title
+            } else {
+                daySection.style.backgroundColor = '#ffffff'; // Reset to white for not completed
+                daySection.querySelector('h2').style.textDecoration = 'none'; // Remove strike-through for title
+            }
+        }
+    </script>
+</body>
+
+</html>
