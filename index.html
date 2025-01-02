@@ -4,14 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberQuest 100-Day To-Do List</title>
-    <link rel="stylesheet" href="index.css">
+    <title>CyberQuest 100-Days </title>
+    <link rel="stylesheet" href="hi.css">
+    <style>
+        /* Default height for larger screens */
+        textarea {
+            height: 300px; /* Adjust height for better usability */
+            width: 100%; /* Ensure textarea spans the width of its container */
+            box-sizing: border-box; /* Include padding and border in the width/height calculation */
+        }
+
+        /* Responsive height for mobile devices */
+        @media (max-width: 200px) {
+            textarea {
+                height: 100px; /* Adjust height for smaller screens */
+            }
+        }
+    </style>
 </head>
 
 <body>
     <header>
-        <!-- Logo and Header -->
-
         <h1>CyberQuest 100-Days Journey</h1>
         <p>Your roadmap to mastering cybersecurity.</p>
     </header>
@@ -29,7 +42,7 @@
     <script>
         const todoList = document.getElementById('todo-list');
 
-        // Generate 60-day sections dynamically
+        // Generate 100-day sections dynamically
         for (let day = 1; day <= 100; day++) {
             const daySection = document.createElement('div');
             daySection.className = 'day';
@@ -42,13 +55,11 @@
                     <label for="complete-${day}">Completed</label>
                 </div>
                 <div class="form-group">
-                    <label for="planned-topics-${day}">Planned Topics</label>
-                    <textarea id="planned-topics-${day}" placeholder="What topics do you plan to learn today?"></textarea>
-                </div>
-                <div class="form-group">
                     <label for="learned-topics-${day}">Learned Topics</label>
                     <textarea id="learned-topics-${day}" placeholder="What topics did you actually learn?"></textarea>
                 </div>
+                <button onclick="saveDay(${day})" id="save-btn-${day}">Save</button>
+                <button onclick="deleteDay(${day})" id="delete-btn-${day}" class="delete-btn">Delete</button>
             `;
 
             todoList.appendChild(daySection);
@@ -80,6 +91,55 @@
             } else {
                 daySection.style.backgroundColor = '#ffffff'; // Reset to white for not completed
                 daySection.querySelector('h2').style.textDecoration = 'none'; // Remove strike-through for title
+            }
+        }
+
+        // Function to save learned topics
+        function saveDay(day) {
+            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+            const saveButton = document.getElementById(`save-btn-${day}`);
+
+            // Disable the textareas
+            learnedTextarea.disabled = true;
+
+            // Disable the save button
+            saveButton.disabled = true;
+
+            // Store data locally
+            localStorage.setItem(`learned-topics-${day}`, learnedTextarea.value);
+        }
+
+        // Function to delete learned topics
+        function deleteDay(day) {
+            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+            const saveButton = document.getElementById(`save-btn-${day}`);
+
+            // Clear textareas
+            learnedTextarea.value = '';
+
+            // Enable the textareas and save button
+            learnedTextarea.disabled = false;
+            saveButton.disabled = false;
+
+            // Remove data from localStorage
+            localStorage.removeItem(`learned-topics-${day}`);
+        }
+
+        // Load saved data when the page loads
+        window.onload = function () {
+            for (let day = 1; day <= 100; day++) {
+                const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+                const saveButton = document.getElementById(`save-btn-${day}`);
+
+                const learnedData = localStorage.getItem(`learned-topics-${day}`);
+
+                if (learnedData) {
+                    learnedTextarea.value = learnedData;
+
+                    // Disable the textareas and save button if data exists
+                    learnedTextarea.disabled = true;
+                    saveButton.disabled = true;
+                }
             }
         }
     </script>
