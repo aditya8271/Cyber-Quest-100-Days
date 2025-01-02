@@ -4,20 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberQuest 100-Days </title>
+    <title>CyberQuest 100-Days</title>
     <link rel="stylesheet" href="index.css">
     <style>
-        /* Default height for larger screens */
         textarea {
-            height: 300px; /* Adjust height for better usability */
-            width: 100%; /* Ensure textarea spans the width of its container */
-            box-sizing: border-box; /* Include padding and border in the width/height calculation */
+            height: 300px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        /* Responsive height for mobile devices */
         @media (max-width: 200px) {
             textarea {
-                height: 100px; /* Adjust height for smaller screens */
+                height: 100px;
             }
         }
     </style>
@@ -51,7 +49,7 @@
                 <div class="day-header">
                     <button class="toggle-btn" onclick="toggleDay(${day})">➕</button>
                     <h2>Day ${day}</h2>
-                    <input type="checkbox" id="complete-${day}" class="complete-checkbox" onchange="toggleCompleted(${day})">
+                    <input type="checkbox" id="complete-${day}" class="complete-checkbox" disabled>
                     <label for="complete-${day}">Completed</label>
                 </div>
                 <div class="form-group">
@@ -73,10 +71,10 @@
 
             if (formGroup[0].style.display === 'none') {
                 formGroup.forEach(item => item.style.display = 'block');
-                toggleBtn.textContent = '➖'; // Change button to collapse
+                toggleBtn.textContent = '➖';
             } else {
                 formGroup.forEach(item => item.style.display = 'none');
-                toggleBtn.textContent = '➕'; // Change button to expand
+                toggleBtn.textContent = '➕';
             }
         }
 
@@ -86,11 +84,11 @@
             const checkbox = document.getElementById(`complete-${day}`);
 
             if (checkbox.checked) {
-                daySection.style.backgroundColor = '#d4edda'; // Green for completed
-                daySection.querySelector('h2').style.textDecoration = 'line-through'; // Strike-through for title
+                daySection.style.backgroundColor = '#d4edda';
+                daySection.querySelector('h2').style.textDecoration = 'line-through';
             } else {
-                daySection.style.backgroundColor = '#ffffff'; // Reset to white for not completed
-                daySection.querySelector('h2').style.textDecoration = 'none'; // Remove strike-through for title
+                daySection.style.backgroundColor = '#ffffff';
+                daySection.querySelector('h2').style.textDecoration = 'none';
             }
         }
 
@@ -98,21 +96,26 @@
         function saveDay(day) {
             const learnedTextarea = document.getElementById(`learned-topics-${day}`);
             const saveButton = document.getElementById(`save-btn-${day}`);
+            const completeCheckbox = document.getElementById(`complete-${day}`);
 
-            // Disable the textareas
+            // Disable the textareas and save button
             learnedTextarea.disabled = true;
-
-            // Disable the save button
             saveButton.disabled = true;
+
+            // Mark as completed
+            completeCheckbox.checked = true;
+            toggleCompleted(day);
 
             // Store data locally
             localStorage.setItem(`learned-topics-${day}`, learnedTextarea.value);
+            localStorage.setItem(`day-completed-${day}`, true);
         }
 
         // Function to delete learned topics
         function deleteDay(day) {
             const learnedTextarea = document.getElementById(`learned-topics-${day}`);
             const saveButton = document.getElementById(`save-btn-${day}`);
+            const completeCheckbox = document.getElementById(`complete-${day}`);
 
             // Clear textareas
             learnedTextarea.value = '';
@@ -121,8 +124,13 @@
             learnedTextarea.disabled = false;
             saveButton.disabled = false;
 
+            // Unmark as completed
+            completeCheckbox.checked = false;
+            toggleCompleted(day);
+
             // Remove data from localStorage
             localStorage.removeItem(`learned-topics-${day}`);
+            localStorage.removeItem(`day-completed-${day}`);
         }
 
         // Load saved data when the page loads
@@ -130,8 +138,10 @@
             for (let day = 1; day <= 100; day++) {
                 const learnedTextarea = document.getElementById(`learned-topics-${day}`);
                 const saveButton = document.getElementById(`save-btn-${day}`);
+                const completeCheckbox = document.getElementById(`complete-${day}`);
 
                 const learnedData = localStorage.getItem(`learned-topics-${day}`);
+                const dayCompleted = localStorage.getItem(`day-completed-${day}`);
 
                 if (learnedData) {
                     learnedTextarea.value = learnedData;
@@ -140,8 +150,13 @@
                     learnedTextarea.disabled = true;
                     saveButton.disabled = true;
                 }
+
+                if (dayCompleted === 'true') {
+                    completeCheckbox.checked = true;
+                    toggleCompleted(day);
+                }
             }
-        }
+        };
     </script>
 </body>
 
