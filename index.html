@@ -6,19 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberQuest 100-Days</title>
     <link rel="stylesheet" href="index.css">
-    <style>
-        textarea {
-            height: 300px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        @media (max-width: 200px) {
-            textarea {
-                height: 100px;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -39,12 +26,12 @@
 
     <script>
         const todoList = document.getElementById('todo-list');
-
+    
         // Generate 100-day sections dynamically
         for (let day = 1; day <= 100; day++) {
             const daySection = document.createElement('div');
             daySection.className = 'day';
-
+    
             daySection.innerHTML = `
                 <div class="day-header">
                     <button class="toggle-btn" onclick="toggleDay(${day})">➕</button>
@@ -54,21 +41,23 @@
                 </div>
                 <div class="form-group">
                     <label for="learned-topics-${day}">Learned Topics</label>
-                    <textarea id="learned-topics-${day}" placeholder="What topics did you actually learn?"></textarea>
+                    <textarea id="learned-topics-${day}" placeholder="Write the topics you learned today..."></textarea>
                 </div>
-                <button onclick="saveDay(${day})" id="save-btn-${day}">Save</button>
-                <button onclick="deleteDay(${day})" id="delete-btn-${day}" class="delete-btn">Delete</button>
+                <div class="button-group">
+                    <button onclick="saveDay(${day})" id="save-btn-${day}" class="action-btn save-btn">Save</button>
+                    <button onclick="deleteDay(${day})" id="delete-btn-${day}" class="action-btn delete-btn">Delete</button>
+                </div>
             `;
-
+    
             todoList.appendChild(daySection);
         }
-
+    
         // Function to toggle day visibility
         function toggleDay(day) {
             const daySection = document.querySelector(`.day:nth-child(${day})`);
             const toggleBtn = daySection.querySelector('.toggle-btn');
             const formGroup = daySection.querySelectorAll('.form-group');
-
+    
             if (formGroup[0].style.display === 'none') {
                 formGroup.forEach(item => item.style.display = 'block');
                 toggleBtn.textContent = '➖';
@@ -77,12 +66,84 @@
                 toggleBtn.textContent = '➕';
             }
         }
+    
+        // Function to save learned topics
+        function saveDay(day) {
+            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+            const saveButton = document.getElementById(`save-btn-${day}`);
+            const completeCheckbox = document.getElementById(`complete-${day}`);
+    
+            if (learnedTextarea.value.trim() === '') {
+                alert('Please write something before saving.');
+                return;
+            }
+    
+            // Disable the textareas and save button
+            learnedTextarea.disabled = true;
+            saveButton.disabled = true;
+    
+            // Mark as completed
+            completeCheckbox.checked = true;
+            toggleCompleted(day);
+    
+            // Store data locally
+            localStorage.setItem(`learned-topics-${day}`, learnedTextarea.value);
+            localStorage.setItem(`day-completed-${day}`, 'true');
+        }
+    
+        // Function to delete learned topics
+        function deleteDay(day) {
+            try {
+                // Get DOM elements
+                const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+                const saveButton = document.getElementById(`save-btn-${day}`);
+                const completeCheckbox = document.getElementById(`complete-${day}`);
+        
+                if (!learnedTextarea || !saveButton || !completeCheckbox) {
+                    console.error(`DOM elements for Day ${day} not found.`);
+                    return;
+                }
+        
+                // Confirm deletion
+                const confirmDelete = confirm(`Are you sure you want to delete the data for Day ${day}?`);
+                if (!confirmDelete) return;
+        
+                // Clear text area
+                learnedTextarea.value = '';
+        
+                // Enable save button and textarea
+                learnedTextarea.disabled = false;
+                saveButton.disabled = false;
+        
+                // Uncheck the completed checkbox
+                completeCheckbox.checked = false;
+        
+                // Reset styles
+                const daySection = document.querySelector(`.day:nth-child(${day})`);
+                if (daySection) {
+                    daySection.style.backgroundColor = '#ffffff';
+                    daySection.querySelector('h2').style.textDecoration = 'none';
+                }
+        
+                // Remove from localStorage
+                localStorage.removeItem(`learned-topics-${day}`);
+                localStorage.removeItem(`day-completed-${day}`);
+        
+                alert(`Data for Day ${day} has been deleted.`);
+            } catch (error) {
+                console.error(`Error while deleting data for Day ${day}:`, error);
+            }
+        }
+        
+    
+        // Function to delete learned topics
 
+    
         // Function to toggle completed state
         function toggleCompleted(day) {
             const daySection = document.querySelector(`.day:nth-child(${day})`);
             const checkbox = document.getElementById(`complete-${day}`);
-
+    
             if (checkbox.checked) {
                 daySection.style.backgroundColor = '#d4edda';
                 daySection.querySelector('h2').style.textDecoration = 'line-through';
@@ -91,66 +152,25 @@
                 daySection.querySelector('h2').style.textDecoration = 'none';
             }
         }
-
-        // Function to save learned topics
-        function saveDay(day) {
-            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
-            const saveButton = document.getElementById(`save-btn-${day}`);
-            const completeCheckbox = document.getElementById(`complete-${day}`);
-
-            // Disable the textareas and save button
-            learnedTextarea.disabled = true;
-            saveButton.disabled = true;
-
-            // Mark as completed
-            completeCheckbox.checked = true;
-            toggleCompleted(day);
-
-            // Store data locally
-            localStorage.setItem(`learned-topics-${day}`, learnedTextarea.value);
-            localStorage.setItem(`day-completed-${day}`, true);
-        }
-
-        // Function to delete learned topics
-        function deleteDay(day) {
-            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
-            const saveButton = document.getElementById(`save-btn-${day}`);
-            const completeCheckbox = document.getElementById(`complete-${day}`);
-
-            // Clear textareas
-            learnedTextarea.value = '';
-
-            // Enable the textareas and save button
-            learnedTextarea.disabled = false;
-            saveButton.disabled = false;
-
-            // Unmark as completed
-            completeCheckbox.checked = false;
-            toggleCompleted(day);
-
-            // Remove data from localStorage
-            localStorage.removeItem(`learned-topics-${day}`);
-            localStorage.removeItem(`day-completed-${day}`);
-        }
-
+    
         // Load saved data when the page loads
         window.onload = function () {
             for (let day = 1; day <= 100; day++) {
                 const learnedTextarea = document.getElementById(`learned-topics-${day}`);
                 const saveButton = document.getElementById(`save-btn-${day}`);
                 const completeCheckbox = document.getElementById(`complete-${day}`);
-
+    
                 const learnedData = localStorage.getItem(`learned-topics-${day}`);
                 const dayCompleted = localStorage.getItem(`day-completed-${day}`);
-
+    
                 if (learnedData) {
                     learnedTextarea.value = learnedData;
-
+    
                     // Disable the textareas and save button if data exists
                     learnedTextarea.disabled = true;
                     saveButton.disabled = true;
                 }
-
+    
                 if (dayCompleted === 'true') {
                     completeCheckbox.checked = true;
                     toggleCompleted(day);
@@ -158,6 +178,7 @@
             }
         };
     </script>
+    
 </body>
 
 </html>
