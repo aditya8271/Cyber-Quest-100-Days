@@ -1,152 +1,176 @@
-/* Global Styles */
+<!DOCTYPE html>
+<html lang="en">
 
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f0f8ff;
-    color: #343a40;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberQuest 100-Days</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        textarea {
+            height: 300px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-header {
-    text-align: center;
-    background: linear-gradient(135deg, #007bff, #6610f2);
-    color: #ffffff;
-    padding: 20px 0;
-    position: relative;
-}
+        @media (max-width: 200px) {
+            textarea {
+                height: 100px;
+            }
+        }
+    </style>
+</head>
 
-header h1 {
-    margin: 0;
-    font-size: 2.5em;
-    color: #ffffff;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-}
+<body>
+    <header>
+        <h1>CyberQuest 100-Days Journey</h1>
+        <p>Your roadmap to mastering cybersecurity.</p>
+    </header>
 
-header p {
-    font-size: 1.2em;
-    font-weight: 300;
-    margin-top: 10px;
-}
+    <main>
+        <section id="todo-list">
+            <!-- Days will be dynamically added here -->
+        </section>
+    </main>
 
-main {
-    padding: 20px;
-    max-width: 900px;
-    margin: 0 auto;
-}
+    <footer>
+        <p>Stay consistent and reach your goals! 🚀</p>
+    </footer>
 
-footer {
-    text-align: center;
-    padding: 10px 0;
-    background: #343a40;
-    color: #ffffff;
-}
+    <script>
+        const todoList = document.getElementById('todo-list');
 
-footer p {
-    margin: 0;
-}
+        // Generate 100-day sections dynamically
+        for (let day = 1; day <= 100; day++) {
+            const daySection = document.createElement('div');
+            daySection.className = 'day';
 
+            daySection.innerHTML = `
+                <div class="day-header">
+                    <button class="toggle-btn" onclick="toggleDay(${day})">➕</button>
+                    <h2>Day ${day}</h2>
+                    <input type="checkbox" id="complete-${day}" class="complete-checkbox" disabled>
+                    <label for="complete-${day}">Completed</label>
+                </div>
+                <div class="form-group">
+                    <label for="learned-topics-${day}">Learned Topics</label>
+                    <textarea id="learned-topics-${day}" placeholder="What topics did you actually learn?"></textarea>
+                </div>
+                <button onclick="saveDay(${day})" id="save-btn-${day}">Save</button>
+                <button onclick="deleteDay(${day})" id="delete-btn-${day}" class="delete-btn">Delete</button>
+            `;
 
-/* Day Sections */
+            todoList.appendChild(daySection);
+        }
 
-.day {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    padding: 20px;
-    animation: fadeInUp 0.5s ease-in-out;
-    position: relative;
-}
+        // Function to toggle day visibility
+        function toggleDay(day) {
+            const daySection = document.querySelector(`.day:nth-child(${day})`);
+            const toggleBtn = daySection.querySelector('.toggle-btn');
+            const formGroup = daySection.querySelectorAll('.form-group');
 
-.day:hover {
-    transform: translateY(-5px);
-    transition: transform 0.3s;
-}
+            if (formGroup[0].style.display === 'none') {
+                formGroup.forEach(item => item.style.display = 'block');
+                toggleBtn.textContent = '➖';
+            } else {
+                formGroup.forEach(item => item.style.display = 'none');
+                toggleBtn.textContent = '➕';
+            }
+        }
 
-.day-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
+        // Function to toggle completed state
+        function toggleCompleted(day) {
+            const daySection = document.querySelector(`.day:nth-child(${day})`);
+            const checkbox = document.getElementById(`complete-${day}`);
 
-.toggle-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin-right: 15px;
-    cursor: pointer;
-}
+            if (checkbox.checked) {
+                daySection.style.backgroundColor = '#d4edda';
+                daySection.querySelector('h2').style.textDecoration = 'line-through';
+            } else {
+                daySection.style.backgroundColor = '#ffffff';
+                daySection.querySelector('h2').style.textDecoration = 'none';
+            }
+        }
 
-.toggle-btn:hover {
-    background-color: #6610f2;
-}
+        // Function to save learned topics
+        function saveDay(day) {
+            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+            const saveButton = document.getElementById(`save-btn-${day}`);
+            const completeCheckbox = document.getElementById(`complete-${day}`);
 
-.day h2 {
-    color: #007bff;
-    font-size: 1.8em;
-    margin: 0;
-}
+            // Disable the textareas and save button
+            learnedTextarea.disabled = true;
+            saveButton.disabled = true;
 
-.complete-checkbox {
-    margin-left: auto;
-    cursor: pointer;
-}
+            // Mark as completed
+            completeCheckbox.checked = true;
+            toggleCompleted(day);
 
-.form-group {
-    margin-bottom: 15px;
-}
+            // Save to the backend (using fetch API)
+            const topicsData = learnedTextarea.value;
+            const completed = completeCheckbox.checked;
 
-label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #495057;
-}
+            fetch('http://localhost:5000/save-topic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ day, topics: topicsData, completed })
+            })
+            .then(response => response.json())
+            .then(data => console.log(data.message))
+            .catch(error => console.error('Error saving data:', error));
+        }
 
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 1em;
-    resize: vertical;
-    transition: border-color 0.3s;
-}
+        // Function to delete learned topics
+        function deleteDay(day) {
+            const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+            const saveButton = document.getElementById(`save-btn-${day}`);
+            const completeCheckbox = document.getElementById(`complete-${day}`);
 
-textarea:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
+            // Clear textareas
+            learnedTextarea.value = '';
 
+            // Enable the textareas and save button
+            learnedTextarea.disabled = false;
+            saveButton.disabled = false;
 
-/* Animation */
+            // Unmark as completed
+            completeCheckbox.checked = false;
+            toggleCompleted(day);
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+            // Remove data from the backend
+            fetch(`http://localhost:5000/delete-topic/${day}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => console.log(data.message))
+                .catch(error => console.error('Error deleting data:', error));
+        }
 
+        // Load saved data when the page loads
+        window.onload = function () {
+            for (let day = 1; day <= 100; day++) {
+                const learnedTextarea = document.getElementById(`learned-topics-${day}`);
+                const saveButton = document.getElementById(`save-btn-${day}`);
+                const completeCheckbox = document.getElementById(`complete-${day}`);
 
-/* Responsive Design */
+                fetch('http://localhost:5000/topics')
+                    .then(response => response.json())
+                    .then(topics => {
+                        const topicForDay = topics.find(topic => topic.day === day);
+                        if (topicForDay) {
+                            learnedTextarea.value = topicForDay.topics;
 
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2em;
-    }
-    header p {
-        font-size: 1em;
-    }
-    .day h2 {
-        font-size: 1.5em;
-    }
-}
+                            // Disable the textareas and save button if data exists
+                            learnedTextarea.disabled = true;
+                            saveButton.disabled = true;
+
+                            // Check if the day is completed
+                            completeCheckbox.checked = topicForDay.completed;
+                            toggleCompleted(day);
+                        }
+                    })
+                    .catch(error => console.error('Error loading topics:', error));
+            }
+        };
+    </script>
+</body>
+
+</html>
